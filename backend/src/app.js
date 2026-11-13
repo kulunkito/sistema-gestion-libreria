@@ -9,6 +9,10 @@ import productRoutes from "./routes/product.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import saleRoutes from "./routes/sale.routes.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import customerRoutes from "./routes/customer.routes.js";
+import supplierRoutes from "./routes/supplier.routes.js";
+import reportRoutes from "./routes/report.routes.js";
 
 import { errorHandler, notFound } from "./middlewares/error.middleware.js";
 
@@ -17,7 +21,7 @@ const app = express();
 app.use(helmet());
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: process.env.FRONTEND_URL || false,
   credentials: true
 }));
 
@@ -42,6 +46,10 @@ app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/sales", saleRoutes);
 app.use("/api/v1/inventory", inventoryRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/customers", customerRoutes);
+app.use("/api/v1/suppliers", supplierRoutes);
+app.use("/api/v1/reports", reportRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

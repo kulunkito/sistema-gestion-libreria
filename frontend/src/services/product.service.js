@@ -22,8 +22,8 @@ export const productService = {
     return response.data.data;
   },
 
-  async deactivate(id) {
-    const response = await api.patch(`/products/${id}/status`);
+  async setActive(id, isActive) {
+    const response = await api.patch(`/products/${id}/status`, { isActive });
     return response.data.data;
   }
 };

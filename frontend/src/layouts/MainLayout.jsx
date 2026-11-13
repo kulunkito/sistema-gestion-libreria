@@ -2,17 +2,22 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const links = [
-  { to: "/dashboard", label: "Dashboard", icon: "⌂" },
-  { to: "/products", label: "Productos", icon: "▤" },
-  { to: "/categories", label: "Categorías", icon: "▦" },
-  { to: "/sales", label: "Ventas", icon: "$" },
-  { to: "/inventory", label: "Inventario", icon: "▣" }
-];
-
 export default function MainLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const links = [
+    { to: "/dashboard", label: "Dashboard", icon: "⌂" },
+    { to: "/products", label: "Productos", icon: "▤" },
+    { to: "/categories", label: "Categorías", icon: "▦" },
+    { to: "/sales", label: "Ventas", icon: "$" },
+    { to: "/inventory", label: "Inventario", icon: "▣" },
+    ...(user?.role === "ADMIN" ? [
+      { to: "/customers", label: "Clientes", icon: "♙" },
+      { to: "/suppliers", label: "Proveedores", icon: "▧" },
+      { to: "/users", label: "Usuarios", icon: "♧" },
+      { to: "/reports", label: "Reportes", icon: "▥" }
+    ] : [])
+  ];
 
   function handleLogout() {
     logout();

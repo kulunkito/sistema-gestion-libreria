@@ -2,18 +2,23 @@
 import api from "./api";
 
 export const inventoryService = {
-  async list() {
-    const response = await api.get("/inventory");
-    return response.data.data;
+  async list(params = {}) {
+    const response = await api.get("/inventory", { params });
+    return response.data;
   },
 
-  async lowStock() {
-    const response = await api.get("/inventory/low-stock");
-    return response.data.data;
+  async lowStock(params = {}) {
+    const response = await api.get("/inventory/low-stock", { params });
+    return response.data;
   },
 
   async movements() {
     const response = await api.get("/inventory/movements");
+    return response.data.data;
+  },
+
+  async createMovement(data) {
+    const response = await api.post("/inventory/movements", data);
     return response.data.data;
   }
 };

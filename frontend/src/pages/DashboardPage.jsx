@@ -1,14 +1,22 @@
 
 import { Link } from "react-router-dom";
-
-const modules = [
-  { title: "Productos", description: "Administrar catálogo", to: "/products" },
-  { title: "Categorías", description: "Organizar productos", to: "/categories" },
-  { title: "Ventas", description: "Registrar operaciones", to: "/sales" },
-  { title: "Inventario", description: "Consultar existencias", to: "/inventory" }
-];
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const modules = [
+    { title: "Productos", description: "Administrar catálogo", to: "/products" },
+    { title: "Categorías", description: "Organizar productos", to: "/categories" },
+    { title: "Ventas", description: "Registrar operaciones", to: "/sales" },
+    { title: "Inventario", description: "Consultar existencias", to: "/inventory" },
+    ...(user?.role === "ADMIN" ? [
+      { title: "Clientes", description: "Administrar clientes", to: "/customers" },
+      { title: "Proveedores", description: "Administrar proveedores", to: "/suppliers" },
+      { title: "Usuarios", description: "Administrar accesos", to: "/users" },
+      { title: "Reportes", description: "Consultar indicadores", to: "/reports" }
+    ] : [])
+  ];
+
   return (
     <div>
       <h1>Dashboard</h1>

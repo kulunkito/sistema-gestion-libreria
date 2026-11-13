@@ -35,27 +35,3 @@ export async function login(email, password) {
     }
   };
 }
-
-export async function createUser(data) {
-  const exists = await User.findOne({
-    where: { email: data.email }
-  });
-
-  if (exists) {
-    throw Object.assign(new Error("El correo ya está registrado"), {
-      status: 409
-    });
-  }
-
-  const passwordHash = await bcrypt.hash(
-    data.password,
-    Number(process.env.BCRYPT_ROUNDS || 12)
-  );
-
-  return User.create({
-    name: data.name,
-    email: data.email,
-    passwordHash,
-    roleId: data.roleId
-  });
-}

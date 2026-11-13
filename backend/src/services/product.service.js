@@ -1,12 +1,18 @@
 
 import { Op } from "sequelize";
-import { Category, Product } from "../models/index.js";
+import sequelize from "../config/database.js";
+import { Category, Product, StockMovement } from "../models/index.js";
 
-export async function getProducts({ page = 1, limit = 10, search, categoryId }) {
-  const safePage = Math.max(1, Number(page));
-  const safeLimit = Math.min(100, Math.max(1, Number(limit)));
+export async function getProducts({ page = 1, limit = 10, search, categoryId }, user) {
+  const parsedPage = Number(page);
+  const parsedLimit = Number(limit);
+  const safePage = Number.isFinite(parsedPage) ? Math.max(1, Math.floor(parsedPage)) : 1;
+  const safeLimit = Number.isFinite(parsedLimit)
+    ? Math.min(100, Math.max(1, Math.floor(parsedLimit)))
+    : 10;
 
   const where = {};
+  if (user?.role !== "ADMIN") where.isActive = true;
 
   if (search) {
     where[Op.or] = [
@@ -40,12 +46,12 @@ export async function getProducts({ page = 1, limit = 10, search, categoryId }) 
   };
 }
 
-export async function getProductById(id) {
+export async function getProductById(id, user) {
   const product = await Product.findByPk(id, {
     include: [{ model: Category, as: "category" }]
   });
 
-  if (!product) {
+  if (!product || (user?.role !== "ADMIN" && !product.isActive)) {
     throw Object.assign(new Error("Producto no encontrado"), {
       status: 404
     });
@@ -54,26 +60,47 @@ export async function getProductById(id) {
   return product;
 }
 
-export async function createProduct(data) {
-  const category = await Category.findByPk(data.categoryId);
+export async function createProduct(data, userId) {
+  return sequelize.transaction(async transaction => {
+    const category = await Category.findByPk(data.categoryId, { transaction });
+    if (!category || !category.isActive) {
+      throw Object.assign(new Error("Categoría inexistente o inactiva"), {
+        status: 422
+      });
+    }
 
-  if (!category || !category.isActive) {
-    throw Object.assign(new Error("Categoría inexistente o inactiva"), {
-      status: 422
-    });
-  }
-
-  return Product.create(data);
+    const initialStock = data.stock || 0;
+    const product = await Product.create({ ...data, stock: 0 }, { transaction });
+    if (initialStock > 0) {
+      await product.update({ stock: initialStock }, { transaction });
+      await StockMovement.create({
+        productId: product.id,
+        userId,
+        type: "IN",
+        quantity: initialStock,
+        reason: "Stock inicial del producto"
+      }, { transaction });
+    }
+    return product;
+  });
 }
 
 export async function updateProduct(id, data) {
-  const product = await getProductById(id);
+  const product = await getProductById(id, { role: "ADMIN" });
+  if (data.categoryId) {
+    const category = await Category.findByPk(data.categoryId);
+    if (!category || !category.isActive) {
+      throw Object.assign(new Error("Categoría inexistente o inactiva"), {
+        status: 422
+      });
+    }
+  }
   await product.update(data);
   return product;
 }
 
-export async function deactivateProduct(id) {
-  const product = await getProductById(id);
-  await product.update({ isActive: false });
+export async function setProductStatus(id, isActive) {
+  const product = await getProductById(id, { role: "ADMIN" });
+  await product.update({ isActive });
   return product;
 }

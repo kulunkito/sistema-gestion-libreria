@@ -3,19 +3,27 @@ import jwt from "jsonwebtoken";
 import { User, Role } from "../models/index.js";
 
 export async function authenticate(req, res, next) {
+  const authorization = req.headers.authorization;
+
+  if (!authorization?.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "Token no proporcionado"
+    });
+  }
+
+  let payload;
   try {
-    const authorization = req.headers.authorization;
-
-    if (!authorization?.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Token no proporcionado"
-      });
-    }
-
     const token = authorization.split(" ")[1];
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    payload = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({
+      success: false,
+      message: "Token inválido o expirado"
+    });
+  }
 
+  try {
     const user = await User.findByPk(payload.sub, {
       include: [{ model: Role, as: "role" }]
     });
@@ -33,12 +41,8 @@ export async function authenticate(req, res, next) {
       email: user.email,
       role: user.role.name
     };
-
     next();
-  } catch {
-    return res.status(401).json({
-      success: false,
-      message: "Token inválido o expirado"
-    });
+  } catch (error) {
+    next(error);
   }
 }

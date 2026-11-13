@@ -2,9 +2,9 @@
 import api from "./api";
 
 export const categoryService = {
-  async list() {
-    const response = await api.get("/categories");
-    return response.data.data;
+  async list(params = {}) {
+    const response = await api.get("/categories", { params });
+    return response.data;
   },
 
   async create(data) {
@@ -14,6 +14,11 @@ export const categoryService = {
 
   async update(id, data) {
     const response = await api.put(`/categories/${id}`, data);
+    return response.data.data;
+  },
+
+  async setActive(id, isActive) {
+    const response = await api.patch(`/categories/${id}/status`, { isActive });
     return response.data.data;
   }
 };

@@ -41,8 +41,14 @@ cp .env.example .env
 Configurar las variables de entorno y ejecutar:
 
 ```bash
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
+
+Antes de ejecutar `db:seed`, configurar `ADMIN_NAME`, `ADMIN_EMAIL` y
+`ADMIN_PASSWORD` en `backend/.env`. No existe una contraseña inicial por
+defecto. La contraseña debe tener entre 8 y 72 caracteres.
 
 ### 3. Frontend
 
@@ -71,6 +77,10 @@ http://localhost:3000/api/v1/health
 ## Documentación
 
 Consultar la carpeta docs/.
+
+Las decisiones funcionales por defecto de esta entrega están en
+[`docs/mvp-decisions.md`](./docs/mvp-decisions.md). El esquema se crea con
+migraciones; no se debe usar `sequelize.sync({ alter: true })`.
 
 ## Metodología
 

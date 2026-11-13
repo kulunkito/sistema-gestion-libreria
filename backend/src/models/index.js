@@ -18,6 +18,8 @@ Product.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
 
 User.hasMany(Sale, { foreignKey: "userId", as: "sales" });
 Sale.belongsTo(User, { foreignKey: "userId", as: "user" });
+User.hasMany(Sale, { foreignKey: "cancelledBy", as: "cancelledSales" });
+Sale.belongsTo(User, { foreignKey: "cancelledBy", as: "canceller" });
 
 Customer.hasMany(Sale, { foreignKey: "customerId", as: "sales" });
 Sale.belongsTo(Customer, { foreignKey: "customerId", as: "customer" });
