@@ -27,7 +27,7 @@ export default function InventoryPage() {
         inventoryService.movements()
       ]);
       setProducts(inventory.data);
-      setMovements(movementResult.data);
+      setMovements(movementResult);
       setError("");
     } catch (loadError) {
       setError(loadError.response?.data?.message || "No se pudo cargar el inventario");
